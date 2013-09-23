@@ -1,0 +1,106 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Audio Spectrum</title>
+    <script src="./jquery.min.js"></script>
+    <script src="./d3.min.js"></script>
+</head>
+
+<body style="background-color:#000000">
+<div id="container">
+    <div id="content" style="text-align: center;">
+        <audio id="audio" src="http://localhost/1.ogg" controls="true" style="width:auto">
+        </audio>
+    </div>
+</div>
+<script type="text/javascript" src="./fft.js"></script>
+<script type="text/javascript" src="./Spectrum.js"></script>
+
+<script>
+    Spectrum.init();
+    var initArr = [];
+    for (var i = 0; i < 36; i++) {
+        initArr[initArr.length] = 0;
+    }
+
+    var rectSVG = d3.select("body").append("svg")
+            .attr("width", '40%')
+            .attr("height", '400px').attr("id", "rectSVG")
+
+    var circleSVG = d3.select("body").append("svg")
+            .attr("width", '40%')
+            .attr("height", '400px').attr("id", "circleSVG")
+
+    var concentricCirclesSVG = d3.select("body").append("svg")
+            .attr("width", '30%')
+            .attr("height", '400px').attr("id", "concentricCircles")
+
+
+    var selection = rectSVG.selectAll('rect').data(initArr);
+    selection.enter().append('rect').attr('y', 100).attr('x',function (d, i) {
+        return i * 40;
+    }).attr('height',function (d, i) {
+                return d
+            }).attr('width', 20).style('fill', 'steelblue')
+
+
+    var selectionCircle = circleSVG.selectAll('circle').data(initArr);
+    selectionCircle.enter().append('circle').attr('cy', 100).attr('cx',function (d, i) {
+        return i * 40;
+    }).attr('r', 0).style('fill', 'steelblue')
+
+    var selectionCoCircle = concentricCirclesSVG.selectAll('circle').data(initArr);
+    selectionCoCircle.enter().append('circle').attr('cy', 100).attr('cx', 100).attr('r',function (d, i) {
+        return d
+    }).style('fill', 'steelblue')
+
+    function callMe() {
+        $('#rectSVG').css('-moz-transform', 'rotate(180deg)').css('position', 'absolute').css('left', '-300px').css('-moz-transform', 'skewY(100)')
+        $('#circleSVG').css('position', 'absolute').css('left', '30%').css('top', '100px')
+        $('#concentricCircles').css('position', 'absolute').css('left', '70%').css('top', '50px')
+        var arr = Spectrum.getSpectrum();
+        var sum = 0;
+        selection = rectSVG.selectAll('rect').data(arr)
+        selection.transition().duration(0).attr('y', 100).attr('x',function (d, i) {
+            return i * 10;
+        }).attr('height',function (d, i) {
+                    return d
+                }).attr('width', 9).style('fill', 'steelblue')
+
+
+        selectionCircle = circleSVG.selectAll('circle').data(arr)
+        selectionCircle.transition().duration(0).attr('cy', 100).attr('cx',function (d, i) {
+            return i * 15;
+        }).attr('r',function (d, i) {
+                    return d / 10;
+                }).style('fill', 'steelblue')
+
+        selectionCoCircle = concentricCirclesSVG.selectAll('circle').data(arr)
+        selectionCoCircle.transition().duration(0).attr('cy', 200).attr('cx', 200).attr('r',function (d, i) {
+            return d * (i/2) / initArr.length
+        }).style('stroke', 'steelblue')
+    }
+
+    selection.transition().duration(0).attr('y', 100).attr('x',function (d, i) {
+        return i * 10;
+    }).attr('height',function (d, i) {
+                return d
+            }).attr('width', 10).style('fill', 'steelblue')
+
+    selectionCircle.transition().duration(0).attr('cy', 100).attr('cx',function (d, i) {
+        return i * 20;
+    }).attr('r', 0).style('fill', 'steelblue')
+
+    selectionCoCircle.transition().duration(0).attr('cy', 200).attr('cx', 200).attr('r',function (d, i) {
+        return (d + i) / (i * i + d)
+    }).style('stroke', 'steelblue')
+
+    selection.exit().remove();
+    selectionCircle.exit().remove();
+    selectionCoCircle.exit().remove();
+    setInterval('callMe()', 0);
+</script>
+
+</body>
+</html>
